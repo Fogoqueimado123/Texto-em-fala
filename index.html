@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./style.css" />
+    <title>Leitor de textos, com voz</title>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <style>
+      @import url('https://fonts.googleapis.com/css?family=Lato');
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: #F4FEF8;
+  font-family: 'Lato', sans-serif;
+  min-height: 100vh;
+  margin: 0;
+}
+
+h1 {
+  text-align: center;
+  color: #2e2e2e;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+h3 {
+  text-align: center;
+  color: #2e2e2e;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.container {
+  margin: auto;
+  padding: 20px;
+}
+
+.btn {
+  cursor: pointer;
+  background-color: #8a8a8a;
+  border: 0;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 16px;
+  padding: 16px;
+  cursor: pointer;
+}
+
+.btn:active {
+  transform: scale(0.98);
+
+}
+
+.btn:focus,
+select:focus {
+  outline: 0;
+}
+select
+{
+  font-size: 1.6rem;
+}
+.btn-toggle {
+  display: block;
+  margin: auto;
+  margin-bottom: 20px;
+}
+
+.text-box {
+  width: 70%;
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -800px);
+  background-color: #444;
+  color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  transition: all 1s ease-in-out;
+}
+
+.text-box.show {
+  transform: translate(-50%, 0);
+}
+
+select {
+  background-color: #444;
+  border: 0;
+  color: #ffffff;
+  font-size: 12px;
+  height: 30px;
+  margin: 0 auto 20px;
+  display: block;
+  min-width: 260px;
+  max-width: 30%;
+}
+
+.text-box textarea {
+  border: 1px #F4FEF8 solid;
+  border-radius: 4px;
+  font-size: 16px;
+  padding: 8px;
+  margin: 15px 0;
+  width: 100%;
+  height: 150px;
+}
+
+.text-box .btn {
+  width: 100%;
+}
+
+.text-box .close {
+  float: right;
+  text-align: right;
+  cursor: pointer;
+}
+
+main {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 10px;
+}
+
+.expression-box {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease-out;
+}
+
+.expression-box.active {
+  box-shadow: 0 0 10px 5px #888;
+}
+
+.expression-box img {
+  width: 100%;
+  object-fit: cover;
+  height: 200px;
+}
+
+.expression-box .info {
+  background-color: #999;
+  color: #fff;
+  font-size: 18px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 0;
+  padding: 10px;
+  text-align: center;
+  height: 100%;
+}
+
+@media (max-width: 1100px) {
+  main {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  main {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+}
+    </style>
+  <section>
+    <div class="container">
+      <h1>Leitor de textos, com voz</h1>
+
+      <h3>Escolha o tipo de voz</h3>
+      <select></select>
+      
+      <button class="btn btn-toggle">Inserir texto</button>
+      
+      <div class="text-box">
+        <div class="close">X</div>
+
+        <textarea placeholder="Insira o texto a ser lido..."></textarea>
+        <button class="btn" id="read">Ler texto</button>
+      </div>
+      
+      <main></main>
+    </div>
+  </section>
+   
+  <script>
+    const main = document.querySelector('main')
+const buttonInsertText = document.querySelector('.btn-toggle')
+const buttonReadText =  document.querySelector('#read')
+const divTextBox = document.querySelector('.text-box')
+const closeDivTextBox = document.querySelector('.close')
+const selectElement = document.querySelector('select')
+const textArea = document.querySelector('textarea')
+const HumanExcpressions = [
+
+{ img: 'https://t3.ftcdn.net/jpg/04/57/73/82/360_F_457738290_y8fywtzTyfT2pQzU5mL1OpKHHAERc6kS.jpg', text: 'Estou com fome' },
+{ img: 'https://media.istockphoto.com/id/1183424538/pt/foto/water-pouring-into-glass.jpg?s=612x612&w=0&k=20&c=DG6q0_Qeh9LzZJ7T083T_LHC8YmMYMFWncmaEs7Oexw=', text: 'Estou com sede' },
+{ img: 'https://cangurunews.com.br/wp-content/uploads/2022/04/crianca-cansada-com-sono.jpg', text: 'Estou cansado' },
+{ img: 'https://png.pngtree.com/png-vector/20230912/ourlarge/pngtree-hurt-teddy-bear-hurt-teddy-png-image_9236567.png', text: 'Estou machucado' },
+{ img: 'https://static.vecteezy.com/ti/fotos-gratis/t2/20556111-feliz-e-alegre-crianca-quer-para-abraco-alguem-amarelo-fundo-cor-foto.jpg', text: 'Estou Feliz' },
+{ img: 'https://maternidadesimples.com.br/wp-content/uploads/2019/01/Como-ensinar-a-crian%C3%A7a-a-lidar-com-a-frustra%C3%A7%C3%A3o-e1547220561538.jpg', text: 'Estou com raiva' },
+{ img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRlcxD2JzDW20_nA86Ci0FUz7t79WjhoWrhvw&s', text: 'Estou triste' },
+{ img: 'https://img-21.ccm2.net/55Jhst1qcbi0Ur4_VvmdUjJePJg=/bfd9bf137b57400c8142f334a6614313/ccm-faq/1300499.jpg', text: 'Estou assustado' },
+{ img: 'https://www.gp1.com.br/media/image_bank/2022/2/parque-da-crianca.jpeg.1500x1000_q85_crop.webp', text: 'Quero ir para fora' },
+{ img: 'https://thumbor.novaescola.org.br/stkKhcU7nPi8P8KVJayv3UkvLSs=/nova-escola-producao.s3.amazonaws.com/gh86j5huHU7VBV5CnSDXqEsajRzuV9tqvw7xwpVZpQQc8n4GEmenTvtTpGnV/sala-de-aula-combinados-getty-image.jpg', text: 'Tenho que ir para escola' },
+{ img: 'https://www.napratica.org.br/wp-content/uploads/2017/07/destaque-videogame.jpeg', text: 'Por favor eu quero jogar vídeo game ' },
+{ img: 'https://img.cancaonova.com/cnimages/canais/uploads/sites/6/2022/08/formacao_ser-pai-uma-vocacao-de-amor.jpg', text: 'Eu quero o meu Pai ' },
+{ img: 'https://www.ninhosdobrasil.com.br/sites/default/files/styles/standard/public/2022-07/M%C3%A3e%20solo%20%E2%80%93%20os%20desafios%20das%20mulheres%20que%20criam%20filhos%20sozinhas.jpg?itok=l2EbaBoi', text: 'Eu quero a minha Mãe ' },
+{ img: 'https://metodosupera.com.br/wp-content/uploads/2023/06/velho-pessoa-idosa-ou-terceira-idade-como-falar-com-o-idoso-3.jpg', text: 'Eu quero o meu vô ' },
+{ img: 'https://clinicadafamiliadf.com.br/wp-content/uploads/2020/07/Sa%C3%BAde-ginecol%C3%B3gica-na-terceira-idade-cuidados-essenciais-min.jpg', text: 'Eu quero a minha vó' }
+]
+
+
+const utterance = new SpeechSynthesisUtterance()
+const setTextMessage = text => {
+    utterance.text = text
+}
+
+const SpeaKText = () =>
+{
+    speechSynthesis.speak(utterance)
+}
+
+const setVoice = event =>
+{
+    const selectedVoice = voices.find(voice => voice.name === event.target.value)
+
+    utterance.voice = selectedVoice
+    
+}
+
+const CreateExpressionBox = ({img, text}) =>
+{
+    const div = document.createElement('div')
+    
+    div.classList.add('expression-box')
+    div.innerHTML = `
+    <img src="${img}" alt="${text}">
+    <p class="info">${text}</p>
+    `
+    div.addEventListener('click', () =>{
+        setTextMessage(text)
+        SpeaKText()
+
+        div.classList.add('active')
+        setTimeout(()=>{
+            div.classList.remove('active')
+        },1000)
+    })
+     main.appendChild(div)
+    
+ }
+
+ HumanExcpressions.forEach(CreateExpressionBox)
+
+let voices = []
+speechSynthesis.addEventListener('voiceschanged', () => {   
+    voices = speechSynthesis.getVoices()
+  const googleVoice =   voices.find(voice => 
+        voice.name === 'Google português do Brasil');
+  const MicrosoftVoice = voices.find(voice => 
+        voice.name === 'Microsoft Maria Desktop - portuguese(Brazil)');
+    
+
+    voices.forEach(({ name, lang }) => {
+     const option = document.createElement('option')
+
+     
+     option.value = name
+     
+if (googleVoice && option.value === googleVoice.name) {
+  utterance.voice = googleVoice;
+  option.selected = true
+} else if (MicrosoftVoice && MicrosoftVoice.name) {
+  utterance.voice = MicrosoftVoice;
+  option.selected = true
+}
+
+
+    
+     option.textContent = `${lang} | ${name}`
+     selectElement.appendChild(option)
+    })
+    
+})
+
+
+buttonInsertText.addEventListener('click', ()=>{
+divTextBox.classList.add('show')
+})
+
+closeDivTextBox.addEventListener('click', () => {
+    divTextBox.classList.remove('show')
+})
+
+selectElement.addEventListener('change', setVoice)
+
+buttonReadText.addEventListener('click', () => {
+    setTextMessage(textArea.value)
+    SpeaKText()
+})
+  </script>
+
+
+  </body>
+</html>
